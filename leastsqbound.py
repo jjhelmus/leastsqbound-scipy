@@ -228,6 +228,11 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
     * F. James and M. Winkler. MINUIT User's Guide, July 16, 2004.
 
     """
+    # use leastsq if no bounds are present
+    if bounds is None:
+        return leastsq(func, x0, args, Dfun, full_output, col_deriv, 
+                        ftol, xtol, gtol, maxfev, epsfcn, factor, diag)
+    
     # create function which convert between internal and external parameters
     i2e = _internal2external_func(bounds)
     e2i = _external2internal_func(bounds)
@@ -235,9 +240,6 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
     x0 = array(x0, ndmin=1)
     i0 = e2i(x0)
     n = len(x0)
-    if bounds is None:
-        return leastsqbound(func, x0, args, Dfun, full_output, col_deriv, 
-                            ftol, xtol, gtol, maxfev, epsfcn, factor, diag)
     if len(bounds) != n:
         raise ValueError('length of x0 != length of bounds')
     if type(args) != type(()):
