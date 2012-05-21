@@ -3,13 +3,14 @@
 from scipy.optimize.minpack import _check_func
 from scipy.optimize import _minpack, leastsq
 from numpy import array, take, eye, triu, transpose, dot
+import warnings
 
 # additional numpy imports that will be needed
 from numpy import empty_like, sqrt, cos, sin, arcsin
 
 def _internal2external_grad(xi, bounds):
     """ 
-    Calculate the internal (unconstrained) to external (unconstrianed) 
+    Calculate the internal (unconstrained) to external (constained) 
     parameter gradiants.
     """ 
     grad = empty_like(xi)
@@ -28,7 +29,7 @@ def _internal2external_grad(xi, bounds):
 def _internal2external_func(bounds):
     """ 
     Make a function which converts between internal (unconstrained) and 
-    external (contrained) parameters.
+    external (constrained) parameters.
     """
     ls = [_internal2external_lambda(b) for b in bounds]
     
@@ -71,8 +72,8 @@ def _external2internal_func(bounds):
  
 def _external2internal_lambda(bound):
     """ 
-    Make a lambda function which converts an single external (constained)
-    parameter to a internal (uncontrained) parameter.
+    Make a lambda function which converts an single external (constrained)
+    parameter to a internal (unconstrained) parameter.
     """
     lower, upper = bound
     
