@@ -1,12 +1,11 @@
 """Constrained multivariate least-squares optimization"""
 
-from scipy.optimize.minpack import _check_func
-from scipy.optimize import _minpack, leastsq
-from numpy import array, take, eye, triu, transpose, dot
 import warnings
 
-# additional numpy imports that will be needed
+from numpy import array, take, eye, triu, transpose, dot
 from numpy import empty_like, sqrt, cos, sin, arcsin
+from scipy.optimize.minpack import _check_func
+from scipy.optimize import _minpack, leastsq
 
 def _internal2external_grad(xi, bounds):
     """ 
@@ -15,7 +14,7 @@ def _internal2external_grad(xi, bounds):
     """ 
     grad = empty_like(xi)
     for i, (v, bound) in enumerate(zip(xi, bounds)):
-        lower,upper = bound
+        lower, upper = bound
         if lower is None and upper is None: # No constraints
             grad[i] = 1.0
         elif upper is None:     # only lower bound
@@ -35,7 +34,7 @@ def _internal2external_func(bounds):
     
     def convert_i2e(xi):
         xe = empty_like(xi)
-        xe[:] = [l(p) for l,p in zip(ls, xi)]
+        xe[:] = [l(p) for l, p in zip(ls, xi)]
         return xe
     
     return convert_i2e
@@ -65,7 +64,7 @@ def _external2internal_func(bounds):
 
     def convert_e2i(xe):
         xi = empty_like(xe)
-        xi[:] = [l(p) for l,p in zip(ls, xe)]
+        xi[:] = [l(p) for l, p in zip(ls, xe)]
         return xi
 
     return convert_e2i
@@ -247,7 +246,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         args = (args,)
     m = _check_func('leastsq', 'func', func, x0, args, n)[0]
     if n > m:
-        raise TypeError('Improper input: N=%s must not exceed M=%s' % (n,m))
+        raise TypeError('Improper input: N=%s must not exceed M=%s' % (n, m))
     
     # define a wrapped func which accept internal parameters, converts them
     # to external parameters and calls func
@@ -260,9 +259,9 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
                 gtol, maxfev, epsfcn, factor, diag)
     else:
         if col_deriv:
-            _check_func('leastsq', 'Dfun', Dfun, x0, args, n, (n,m))
+            _check_func('leastsq', 'Dfun', Dfun, x0, args, n, (n, m))
         else:
-            _check_func('leastsq', 'Dfun', Dfun, x0, args, n, (m,n))
+            _check_func('leastsq', 'Dfun', Dfun, x0, args, n, (m, n))
         if (maxfev == 0):
             maxfev = 100*(n + 1)
         def wDfun(x, *args): return Dfun(i2e(x), *args) # wrapped Dfun
@@ -294,8 +293,8 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
 
     info = retval[-1]    # The FORTRAN return value
 
-    if (info not in [1,2,3,4] and not full_output):
-        if info in [5,6,7,8]:
+    if (info not in [1, 2, 3, 4] and not full_output):
+        if info in [5, 6, 7, 8]:
             warnings.warn(errors[info][0], RuntimeWarning)
         else:
             try:
@@ -312,14 +311,14 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         retval[1]['fjac'] = (retval[1]['fjac'].T / take(grad, 
                             retval[1]['ipvt'] - 1)).T
         cov_x = None
-        if info in [1,2,3,4]:
+        if info in [1, 2, 3, 4]:
             from numpy.dual import inv
             from numpy.linalg import LinAlgError
-            perm = take(eye(n),retval[1]['ipvt']-1,0)
-            r = triu(transpose(retval[1]['fjac'])[:n,:])
+            perm = take(eye(n), retval[1]['ipvt'] - 1, 0)
+            r = triu(transpose(retval[1]['fjac'])[:n, :])
             R = dot(r, perm)
             try:
-                cov_x = inv(dot(transpose(R),R))
+                cov_x = inv(dot(transpose(R), R))
             except LinAlgError:
                 pass
         return (x, cov_x) + retval[1:-1] + (mesg, info)
