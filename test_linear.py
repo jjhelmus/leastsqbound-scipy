@@ -1,27 +1,30 @@
-#! /usr/bin/env python27
+#! /usr/bin/env python
 
 import numpy as np
 from scipy.optimize import leastsq
 from leastsqbound import leastsqbound
 
-def func(p,x):
-    """model data as y = m*x+b """
-    m,b = p
-    return m*np.array(x)+b
 
-def err(p,y,x):
-    return y-func(p,x)
+def func(p, x):
+    """model data as y = m*x+b """
+    m, b = p
+    return m * np.array(x) + b
+
+
+def err(p, y, x):
+    return y - func(p, x)
+
 
 # extract data
 temp = np.genfromtxt("sample_data.dat")
-x = temp[:,0]
-y = temp[:,1]
+x = temp[:, 0]
+y = temp[:, 1]
 
 # perform unbounded least squares fitting
-p0 = [1.0,0.0]
+p0 = [1.0, 0.0]
 p, cov_x, infodic, mesg, ier = leastsq(err, p0, args=(y, x), full_output=True)
 
-# print out results 
+# print out results
 print "Standard Least Squares fitting results:"
 print "p:", p
 print "cov_x:", cov_x
@@ -35,11 +38,11 @@ print "ier:", ier
 print ""
 
 # same as above using no bounds
-p0 = [1.0,0.0]
-p, cov_x, infodic, mesg, ier = leastsqbound(err, p0, args=(y, x), 
-                                                full_output=True)
+p0 = [1.0, 0.0]
+p, cov_x, infodic, mesg, ier = leastsqbound(err, p0, args=(y, x),
+                                            full_output=True)
 
-# print out results 
+# print out results
 print "Bounded Least Squares fitting with no bounds results:"
 print "p:", p
 print "cov_x:", cov_x
@@ -54,12 +57,12 @@ print ""
 
 
 # perform bounded least squares fitting
-p0 = [1.0,0.0]
-bounds = [(0.0, 2.0), (-10.0, 10.0)] 
+p0 = [1.0, 0.0]
+bounds = [(0.0, 2.0), (-10.0, 10.0)]
 p, cov_x, infodic, mesg, ier = leastsqbound(err, p0, args=(y, x),
                                             bounds = bounds, full_output=True)
 
-# print out results 
+# print out results
 print "Bounded Least Squares fitting results:"
 print "p:", p
 print "cov_x:", cov_x

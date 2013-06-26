@@ -92,8 +92,8 @@ def _external2internal_lambda(bound):
 
 
 def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
-            col_deriv=0, ftol=1.49012e-8, xtol=1.49012e-8,
-            gtol=0.0, maxfev=0, epsfcn=0.0, factor=100, diag=None):
+                 col_deriv=0, ftol=1.49012e-8, xtol=1.49012e-8,
+                 gtol=0.0, maxfev=0, epsfcn=0.0, factor=100, diag=None):
     """
     Bounded minimization of the sum of squares of a set of equations.
 
@@ -237,7 +237,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
     # use leastsq if no bounds are present
     if bounds is None:
         return leastsq(func, x0, args, Dfun, full_output, col_deriv,
-                        ftol, xtol, gtol, maxfev, epsfcn, factor, diag)
+                       ftol, xtol, gtol, maxfev, epsfcn, factor, diag)
 
     # create function which convert between internal and external parameters
     i2e = _internal2external_func(bounds)
@@ -248,7 +248,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
     n = len(x0)
     if len(bounds) != n:
         raise ValueError('length of x0 != length of bounds')
-    if type(args) != type(()):
+    if not isinstance(args, tuple):
         args = (args,)
     m = _check_func('leastsq', 'func', func, x0, args, n)[0]
     if n > m:
@@ -263,7 +263,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         if (maxfev == 0):
             maxfev = 200 * (n + 1)
         retval = _minpack._lmdif(wfunc, i0, args, full_output, ftol, xtol,
-                gtol, maxfev, epsfcn, factor, diag)
+                                 gtol, maxfev, epsfcn, factor, diag)
     else:
         if col_deriv:
             _check_func('leastsq', 'Dfun', Dfun, x0, args, n, (n, m))
@@ -276,29 +276,32 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
             return Dfun(i2e(x), *args)
 
         retval = _minpack._lmder(func, wDfun, i0, args, full_output,
-                col_deriv, ftol, xtol, gtol, maxfev, factor, diag)
+                                 col_deriv, ftol, xtol, gtol, maxfev,
+                                 factor, diag)
 
     errors = {0: ["Improper input parameters.", TypeError],
               1: ["Both actual and predicted relative reductions "
-                 "in the sum of squares\n  are at most %f" % ftol, None],
+                  "in the sum of squares\n  are at most %f" % ftol, None],
               2: ["The relative error between two consecutive "
-                 "iterates is at most %f" % xtol, None],
+                  "iterates is at most %f" % xtol, None],
               3: ["Both actual and predicted relative reductions in "
-                 "the sum of squares\n  are at most %f and the "
-                 "relative error between two consecutive "
-                 "iterates is at \n  most %f" % (ftol, xtol), None],
+                  "the sum of squares\n  are at most %f and the "
+                  "relative error between two consecutive "
+                  "iterates is at \n  most %f" % (ftol, xtol), None],
               4: ["The cosine of the angle between func(x) and any "
-                 "column of the\n  Jacobian is at most %f in "
-                 "absolute value" % gtol, None],
+                  "column of the\n  Jacobian is at most %f in "
+                  "absolute value" % gtol, None],
               5: ["Number of calls to function has reached "
-                 "maxfev = %d." % maxfev, ValueError],
+                  "maxfev = %d." % maxfev, ValueError],
               6: ["ftol=%f is too small, no further reduction "
-                 "in the sum of squares\n  is possible.""" % ftol, ValueError],
+                  "in the sum of squares\n  is possible.""" % ftol,
+                  ValueError],
               7: ["xtol=%f is too small, no further improvement in "
-                 "the approximate\n  solution is possible." % xtol, ValueError],
+                  "the approximate\n  solution is possible." % xtol,
+                  ValueError],
               8: ["gtol=%f is too small, func(x) is orthogonal to the "
-                 "columns of\n  the Jacobian to machine "
-                 "precision." % gtol, ValueError],
+                  "columns of\n  the Jacobian to machine "
+                  "precision." % gtol, ValueError],
               'unknown': ["Unknown error.", TypeError]}
 
     info = retval[-1]    # The FORTRAN return value
@@ -319,7 +322,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         # convert fjac from internal params to external
         grad = _internal2external_grad(retval[0], bounds)
         retval[1]['fjac'] = (retval[1]['fjac'].T / take(grad,
-                            retval[1]['ipvt'] - 1)).T
+                             retval[1]['ipvt'] - 1)).T
         cov_x = None
         if info in [1, 2, 3, 4]:
             from numpy.dual import inv
