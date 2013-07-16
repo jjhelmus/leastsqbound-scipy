@@ -253,6 +253,8 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
     m = _check_func('leastsq', 'func', func, x0, args, n)[0]
     if n > m:
         raise TypeError('Improper input: N=%s must not exceed M=%s' % (n, m))
+    if epsfcn is None:
+        epsfcn = sqrt(finfo(dtype).eps)
 
     # define a wrapped func which accept internal parameters, converts them
     # to external parameters and calls func
