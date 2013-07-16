@@ -2,7 +2,7 @@
 
 import warnings
 
-from numpy import array, take, eye, triu, transpose, dot
+from numpy import array, take, eye, triu, transpose, dot, finfo
 from numpy import empty_like, sqrt, cos, sin, arcsin
 from scipy.optimize.minpack import _check_func
 from scipy.optimize import _minpack, leastsq
@@ -250,7 +250,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         raise ValueError('length of x0 != length of bounds')
     if not isinstance(args, tuple):
         args = (args,)
-    m = _check_func('leastsq', 'func', func, x0, args, n)[0]
+    m, dtype = _check_func('leastsq', 'func', func, x0, args, n)
     if n > m:
         raise TypeError('Improper input: N=%s must not exceed M=%s' % (n, m))
     if epsfcn is None:
