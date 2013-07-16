@@ -93,7 +93,7 @@ def _external2internal_lambda(bound):
 
 def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
                  col_deriv=0, ftol=1.49012e-8, xtol=1.49012e-8,
-                 gtol=0.0, maxfev=0, epsfcn=0.0, factor=100, diag=None):
+                 gtol=0.0, maxfev=0, epsfcn=None, factor=100, diag=None):
     """
     Bounded minimization of the sum of squares of a set of equations.
 
