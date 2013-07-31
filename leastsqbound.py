@@ -4,7 +4,7 @@ import warnings
 
 from numpy import array, take, eye, triu, transpose, dot, finfo
 from numpy import empty_like, sqrt, cos, sin, arcsin
-from scipy.optimize.minpack import _check_func
+from numpy import atleast_1d, shape, issubdtype, dtype
 from scipy.optimize import _minpack, leastsq
 
 
@@ -90,6 +90,26 @@ def _external2internal_lambda(bound):
     else:
         return lambda x: arcsin((2. * (x - lower) / (upper - lower)) - 1.)
 
+def _check_func(checker, argname, thefunc, x0, args, numinputs, output_shape=None):
+    res = atleast_1d(thefunc(*((x0[:numinputs],) + args)))
+    if (output_shape is not None) and (shape(res) != output_shape):
+        if (output_shape[0] != 1):
+            if len(output_shape) > 1:
+                if output_shape[1] == 1:
+                    return shape(res)
+            msg = "%s: there is a mismatch between the input and output " \
+                  "shape of the '%s' argument" % (checker, argname)
+            func_name = getattr(thefunc, '__name__', None)
+            if func_name:
+                msg += " '%s'." % func_name
+            else:
+                msg += "."
+            raise TypeError(msg)
+    if issubdtype(res.dtype, inexact):
+        dt = res.dtype
+    else:
+        dt = dtype(float)
+    return shape(res), dt
 
 def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
                  col_deriv=0, ftol=1.49012e-8, xtol=1.49012e-8,
