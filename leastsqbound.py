@@ -4,7 +4,7 @@ import warnings
 
 from numpy import array, take, eye, triu, transpose, dot, finfo
 from numpy import empty_like, sqrt, cos, sin, arcsin
-from numpy import atleast_1d, shape, issubdtype, dtype
+from numpy import atleast_1d, shape, issubdtype, dtype, inexact
 from scipy.optimize import _minpack, leastsq
 
 
@@ -90,7 +90,9 @@ def _external2internal_lambda(bound):
     else:
         return lambda x: arcsin((2. * (x - lower) / (upper - lower)) - 1.)
 
-def _check_func(checker, argname, thefunc, x0, args, numinputs, output_shape=None):
+
+def _check_func(checker, argname, thefunc, x0, args, numinputs,
+                output_shape=None):
     res = atleast_1d(thefunc(*((x0[:numinputs],) + args)))
     if (output_shape is not None) and (shape(res) != output_shape):
         if (output_shape[0] != 1):
@@ -110,6 +112,7 @@ def _check_func(checker, argname, thefunc, x0, args, numinputs, output_shape=Non
     else:
         dt = dtype(float)
     return shape(res), dt
+
 
 def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
                  col_deriv=0, ftol=1.49012e-8, xtol=1.49012e-8,
@@ -263,18 +266,19 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
     i2e = _internal2external_func(bounds)
     e2i = _external2internal_func(bounds)
 
-    x0 = array(x0, ndmin=1)
+    x0 = asarray(x0).flatten()
     i0 = e2i(x0)
     n = len(x0)
     if len(bounds) != n:
         raise ValueError('length of x0 != length of bounds')
     if not isinstance(args, tuple):
         args = (args,)
-    m, dtype = _check_func('leastsq', 'func', func, x0, args, n)
+    shape, dtype = _check_func('leastsq', 'func', func, x0, args, n)
+    m = shape[0]
     if n > m:
         raise TypeError('Improper input: N=%s must not exceed M=%s' % (n, m))
     if epsfcn is None:
-        epsfcn = sqrt(finfo(dtype).eps)
+        epsfcn = finfo(dtype).eps
 
     # define a wrapped func which accept internal parameters, converts them
     # to external parameters and calls func
