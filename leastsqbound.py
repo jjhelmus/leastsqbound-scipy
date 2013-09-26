@@ -3,7 +3,7 @@
 import warnings
 
 from numpy import array, take, eye, triu, transpose, dot, finfo
-from numpy import empty_like, sqrt, cos, sin, arcsin
+from numpy import empty_like, sqrt, cos, sin, arcsin, asarray
 from numpy import atleast_1d, shape, issubdtype, dtype, inexact
 from scipy.optimize import _minpack, leastsq
 
@@ -301,7 +301,7 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
         def wDfun(x, *args):  # wrapped Dfun
             return Dfun(i2e(x), *args)
 
-        retval = _minpack._lmder(func, wDfun, i0, args, full_output,
+        retval = _minpack._lmder(wfunc, wDfun, i0, args, full_output,
                                  col_deriv, ftol, xtol, gtol, maxfev,
                                  factor, diag)
 
