@@ -244,6 +244,18 @@ def leastsqbound(func, x0, args=(), bounds=None, Dfun=None, full_output=0,
     These transfomations are used in the MINUIT package, and described in
     detail in the section 1.3.1 of the MINUIT User's Guide.
 
+    When a parameter being optimized takes an on values near one of the
+    imposed bounds the optimization can become blocked and the solution
+    returned may be non-optimal.  In addition, near the limits cov_x and
+    related returned variables do not contain meanful results.
+
+    For best results, bounds of parameters should be limited to only those
+    which are absolutly necessary, limits should be made wide enough to avoid
+    parameters taking values near these limits and the optimization should be
+    repeated without limits after a satisfactory minimum has been found for
+    best error analysis. See section 1.3 and 5.3 of the MINUIT User's Guide
+    for addition discussion of this topic.
+
     To Do
     -----
     Currently the ``factor`` and ``diag`` parameters scale the
